@@ -36,7 +36,7 @@ docker-compose logs -f
 ```
 
 ### 3. Anwendung öffnen
-Öffne `http://localhost:7002` in deinem Browser.
+Öffne `http://localhost:7000` in deinem Browser.
 
 ## 🛠️ Lokale Entwicklung
 
@@ -53,7 +53,7 @@ npm install
 npm start
 ```
 
-Die Anwendung läuft dann auf `http://localhost:7002`.
+Die Anwendung läuft dann auf `http://localhost:7000`.
 
 ## 🐳 Docker Commands
 
@@ -121,7 +121,7 @@ Das moderne Glassmorphism-Design verwendet:
 ## 🔧 Konfiguration
 
 ### Umgebungsvariablen
-- `PORT` - Server Port (default: 7002)
+- `PORT` - Server Port (default: 7000)
 - `NODE_ENV` - Environment (development/production)
 
 ### Docker Volumes
@@ -146,7 +146,7 @@ mkdir -p data
 docker-compose up -d
 
 # 5. Firewall konfigurieren (falls erforderlich)
-sudo ufw allow 7002
+sudo ufw allow 7000
 ```
 
 ## 🔒 Sicherheit

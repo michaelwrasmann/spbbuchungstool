@@ -5,7 +5,7 @@ services:
     build: .
     container_name: spb-buchungstool
     ports:
-      - "7002:7002"
+      - "7000:7000"
     volumes:
       # Persistente SQLite Datenbank
       - ./data:/app/data
@@ -14,7 +14,7 @@ services:
       # - /app/node_modules
     environment:
       - NODE_ENV=production
-      - PORT=7002
+      - PORT=7000
     restart: unless-stopped
     networks:
       - spb-network

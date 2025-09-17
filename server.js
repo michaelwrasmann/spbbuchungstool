@@ -3,7 +3,7 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const app = express();
-const port = process.env.PORT || 7002; // z. B. Glitch liefert den Port
+const port = process.env.PORT || 7000; // z. B. Glitch liefert den Port
 
 // CORS aktivieren – alle Origins erlauben
 app.use(cors({ origin: '*' }));

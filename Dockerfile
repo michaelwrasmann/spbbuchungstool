@@ -17,8 +17,8 @@ COPY . .
 RUN mkdir -p /app/data && \
     chown -R node:node /app
 
-# Port 7002 freigeben
-EXPOSE 7002
+# Port 7000 freigeben
+EXPOSE 7000
 
 # Als non-root user ausführen für Sicherheit
 USER node
@@ -28,7 +28,7 @@ VOLUME ["/app/data"]
 
 # Gesundheitscheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:7002/bookings || exit 1
+  CMD curl -f http://localhost:7000/bookings || exit 1
 
 # App starten
 CMD ["npm", "start"]
