@@ -3,7 +3,7 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const app = express();
-const port = process.env.PORT || 7001; // z. B. Glitch liefert den Port
+const port = process.env.PORT || 7002; // z. B. Glitch liefert den Port
 
 // CORS aktivieren – alle Origins erlauben
 app.use(cors({ origin: '*' }));
@@ -17,11 +17,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
 // Verbindung zur SQLite-Datenbank herstellen
-const db = new sqlite3.Database('./bookings.db', (err) => {
+// In Docker: persistente Datenbank im data Volume
+const dbPath = process.env.NODE_ENV === 'production' ? './data/bookings.db' : './bookings.db';
+const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Fehler beim Verbinden mit der Datenbank:', err.message);
   } else {
-    console.log('Verbunden mit der SQLite-Datenbank.');
+    console.log(`Verbunden mit der SQLite-Datenbank: ${dbPath}`);
   }
 });
 
