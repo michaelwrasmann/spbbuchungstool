@@ -732,7 +732,7 @@
        Buchungen laden
     ------------------------------------------------------------------ */
     function loadBookings(){
-      fetch("http://localhost:7000/bookings")
+      fetch("/bookings")
         .then(r => r.json())
         .then(data => {
           bookings = data;
@@ -819,7 +819,7 @@
       }
       if(conflict){showError("Buchung nicht möglich. Der Platz ist an ausgewählten Tagen bereits belegt!");return;}
 
-      fetch("http://localhost:7000/bookings",{
+      fetch("/bookings",{
         method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({roomId:selectedRoomId,name,startDate:s,endDate:e})
       })
@@ -831,7 +831,7 @@
     /* -- Löschen gesamter Zeitraum ------------------------------------*/
     document.getElementById("deleteWhole").onclick = ()=>{
       if(!currentBookingToDelete){document.getElementById("deleteModal").style.display="none";return;}
-      fetch(`http://localhost:7000/bookings/${currentBookingToDelete.id}`,{method:"DELETE"})
+      fetch(`/bookings/${currentBookingToDelete.id}`,{method:"DELETE"})
         .then(r=>r.json())
         .then(()=>{currentBookingToDelete=null;document.getElementById("deleteModal").style.display="none";loadBookings();})
         .catch(err=>console.error("Fehler beim Löschen:",err));
@@ -855,7 +855,7 @@
     document.getElementById("partialDeleteConfirm").onclick = ()=>{
       const dates=[...document.querySelectorAll('#partialDeleteList input:checked')].map(cb=>cb.value);
       if(!dates.length){showError("Bitte wählen Sie mindestens einen Tag aus!");return;}
-      fetch(`http://localhost:7000/bookings/${currentBookingToDelete.id}/split`,{
+      fetch(`/bookings/${currentBookingToDelete.id}/split`,{
         method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({deleteDates:dates})
       })
         .then(r=>r.json())
