@@ -19,18 +19,17 @@ services:
     networks:
       - spb-network
 
-  # Optional: Reverse Proxy mit Nginx (für Production)
+  # Nginx Reverse Proxy mit SSL Terminierung
   nginx:
     image: nginx:alpine
     container_name: spb-nginx
-    profiles: ["production"]
+    profiles: ["production", "ssl"]
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      # SSL Zertifikate (falls benötigt)
-      # - ./ssl:/etc/nginx/ssl:ro
+      - ./ssl:/etc/nginx/ssl:ro
     depends_on:
       - spb-buchungstool
     restart: unless-stopped
@@ -45,6 +44,6 @@ networks:
     driver: bridge
 
 # Verwendung:
-# Development: docker-compose up
-# Production mit Nginx: docker-compose --profile production up
-# Nur die App: docker-compose up spb-buchungstool
+# Development (nur App): docker-compose up spb-buchungstool
+# Production mit SSL: docker-compose --profile ssl up
+# Production ohne SSL: docker-compose --profile production up

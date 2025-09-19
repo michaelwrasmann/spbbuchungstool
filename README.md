@@ -16,6 +16,7 @@ Ein modernes Raumbuchungstool mit Glassmorphism-Design für Desksharing und Raum
 ### Voraussetzungen
 - Docker und Docker Compose installiert
 - Git
+- OpenSSL (für SSL Zertifikate)
 
 ### 1. Repository klonen
 ```bash
@@ -23,20 +24,32 @@ git clone https://github.com/michaelwrasmann/spbbuchungstool.git
 cd spbbuchungstool
 ```
 
-### 2. Docker Container starten
+### 2. Deployment-Optionen
+
+#### Option A: Einfacher Start (HTTP)
 ```bash
-# Einfacher Start
-docker-compose up -d
+# Nur die App starten (Port 7000)
+docker-compose up spb-buchungstool -d
 
-# Mit Build (falls Änderungen vorgenommen wurden)
-docker-compose up --build -d
+# Zugriff: http://localhost:7000
+```
 
-# Logs anzeigen
-docker-compose logs -f
+#### Option B: Production mit SSL (HTTPS) 🔐
+```bash
+# 1. SSL Zertifikat generieren
+./generate-ssl.sh
+
+# 2. Container mit nginx + SSL starten
+docker-compose --profile ssl up -d
+
+# 3. Zugriff über HTTPS
+# https://localhost (Port 443)
+# https://server-ip (von anderen Rechnern)
 ```
 
 ### 3. Anwendung öffnen
-Öffne `http://localhost:7000` in deinem Browser.
+- **HTTP**: `http://localhost:7000`
+- **HTTPS**: `https://localhost` oder `https://server-ip`
 
 ## 🛠️ Lokale Entwicklung
 
@@ -61,20 +74,60 @@ Die Anwendung läuft dann auf `http://localhost:7000`.
 # Container stoppen
 docker-compose down
 
+# Container mit SSL stoppen
+docker-compose --profile ssl down
+
 # Container und Volumes löschen (⚠️ Daten gehen verloren!)
 docker-compose down -v
 
-# Nur die App ohne nginx
-docker-compose up spb-buchungstool
-
-# Production Mode mit nginx
-docker-compose --profile production up
+# Verschiedene Deployment Modi:
+docker-compose up spb-buchungstool -d        # Nur App (HTTP)
+docker-compose --profile ssl up -d           # App + nginx + SSL
+docker-compose --profile production up -d    # App + nginx (HTTP)
 
 # Container neu bauen
 docker-compose build
 
 # Container Status prüfen
 docker-compose ps
+
+# Logs anzeigen
+docker-compose logs -f
+docker-compose logs nginx  # Nur nginx logs
+```
+
+## 🔐 SSL Konfiguration
+
+### Selbst-signiertes Zertifikat
+```bash
+# SSL Zertifikat generieren
+./generate-ssl.sh
+
+# Server IP eingeben (z.B. 192.168.1.100)
+# Zertifikate werden in ./ssl/ erstellt
+```
+
+### Browser SSL-Warnung
+Da selbst-signierte Zertifikate verwendet werden:
+1. Browser zeigt Sicherheitswarnung
+2. Klicken Sie "Erweitert"
+3. Klicken Sie "Weiter zu [server-ip]"
+4. Zertifikat wird dauerhaft akzeptiert
+
+### Externes Zugriff (andere Rechner)
+```bash
+# 1. SSL Zertifikat mit Server-IP generieren
+./generate-ssl.sh  # Server-IP eingeben: 192.168.1.100
+
+# 2. Container mit SSL starten
+docker-compose --profile ssl up -d
+
+# 3. Firewall öffnen
+sudo ufw allow 80   # HTTP (redirect zu HTTPS)
+sudo ufw allow 443  # HTTPS
+
+# 4. Zugriff von anderen Rechnern:
+# https://192.168.1.100
 ```
 
 ## 📊 Datenbank
@@ -145,8 +198,16 @@ mkdir -p data
 # 4. Container starten
 docker-compose up -d
 
-# 5. Firewall konfigurieren (falls erforderlich)
-sudo ufw allow 7000
+# 5. SSL Zertifikat generieren (für HTTPS)
+./generate-ssl.sh  # Server-IP eingeben
+
+# 6. Container mit SSL starten
+docker-compose --profile ssl up -d
+
+# 7. Firewall konfigurieren
+sudo ufw allow 80    # HTTP (redirect)
+sudo ufw allow 443   # HTTPS
+# Oder nur HTTP: sudo ufw allow 7000
 ```
 
 ## 🔒 Sicherheit
