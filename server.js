@@ -49,13 +49,30 @@ app.get('/bookings', (req, res) => {
 
 // API-Endpunkt: Neue Buchung speichern
 app.post('/bookings', (req, res) => {
+  console.log('POST /bookings - Request body:', req.body);
+  
   const { roomId, name, startDate, endDate } = req.body;
+  
+  // Validation
+  if (!roomId || !name || !startDate || !endDate) {
+    console.error('Missing required fields:', { roomId, name, startDate, endDate });
+    res.status(400).json({ 
+      error: 'Missing required fields', 
+      received: { roomId, name, startDate, endDate }
+    });
+    return;
+  }
+  
   const sql = `INSERT INTO bookings (roomId, name, startDate, endDate) VALUES (?, ?, ?, ?)`;
+  console.log('Executing SQL:', sql, 'with values:', [roomId, name, startDate, endDate]);
+  
   db.run(sql, [roomId, name, startDate, endDate], function(err) {
     if (err) {
+      console.error('Database error:', err.message);
       res.status(500).json({ error: err.message });
       return;
     }
+    console.log('Booking created successfully with ID:', this.lastID);
     res.json({ id: this.lastID });
   });
 });
