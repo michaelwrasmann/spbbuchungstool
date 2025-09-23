@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPB DESKSHARING - Light Version</title>
+
+  <style>
+    :root{
+      /* Simple Dark Theme Colors - No gradients */
+      --primary-neon:#00ff88;
+      --primary-purple:#8b5cf6;
+      --primary-blue:#06b6d4;
+      --primary-pink:#ec4899;
+      --accent-gold:#f59e0b;
+      
+      /* Solid colors instead of gradients */
+      --bg-dark:#1a1a2e;
+      --surface-dark:#2d2d44;
+      --surface-hover:#3d3d55;
+      
+      /* Simplified effects */
+      --simple-border:1px solid rgba(255, 255, 255, 0.2);
+      --simple-shadow:0 4px 12px rgba(0, 0, 0, 0.3);
+      --border-radius:8px;
+
+      /* Legacy compatibility */
+      --primary-green:#04F498;
+      --primary-red:#FF7597;
+      --text-color:#fff;
+      --default-text:#fff;
+    }
+
+    body{
+      background: var(--bg-dark); /* Solid color instead of gradient */
+      margin:0 20px 20px;
+      color:var(--primary-neon);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      min-height: 100vh;
+    }
+    /* NO animated background particles */
+
+    /* ---------- Simple Header Images ---------- */
+    .headerImage{
+      display:block;
+      margin:5px auto -20px;
+      max-width:420px;
+    }
+    .midImage{
+      display:block;
+      margin:-20px auto -20px;
+      max-width:420px;
+    }
+
+    /* ---------- Simple Room Selection ---------- */
+    .container{
+      margin:-20px auto -20px;
+      max-width:900px;
+      text-align:center;
+      position:relative;
+      padding:5px;
+    }
+    svg{
+      margin:0 auto;
+      display:block;
+      width:720px;
+      height:200px;
+    }
+    .roomGroup{
+      transform-box:fill-box;
+      transform-origin:center;
+      transition:transform 0.2s ease; /* Simplified animation */
+    }
+    .roomGroup:hover{
+      transform:scale(1.05); /* Simple scale, no translate */
+    }
+    .roomGroup rect{
+      cursor:pointer;
+      transition:fill 0.2s ease;
+    }
+    .roomGroup text{
+      font-weight:bold;
+      fill:#000!important;
+      pointer-events:none;
+      font-size:14px;
+    }
+
+    /* ---------- Simple Preview ---------- */
+    #preview{
+      position:absolute;
+      background:var(--surface-dark);
+      border:var(--simple-border);
+      border-radius:12px;
+      padding:10px;
+      z-index:1000;
+      display:none;
+      opacity:0;
+      transition:opacity 0.2s ease;
+      box-shadow:var(--simple-shadow);
+    }
+    #preview img{
+      border-radius:8px;
+    }
+
+    /* ---------- Simple Calendar ---------- */
+    .calendarWrapper{
+      margin-top:-15px;
+      padding:10px;
+    }
+    .weekNav{
+      text-align:center;
+      margin:30px 0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:20px;
+    }
+    .weekNav button{
+      padding:10px 20px;
+      font-size:14px;
+      border:none;
+      border-radius:8px;
+      background:var(--surface-dark);
+      color:var(--primary-neon);
+      font-weight:600;
+      cursor:pointer;
+      transition:background-color 0.2s ease;
+      border:var(--simple-border);
+    }
+    .weekNav button:hover{
+      background:var(--surface-hover);
+    }
+    #weekLabel{
+      color:var(--primary-neon);
+      font-weight:600;
+      font-size:18px;
+    }
+
+    .calendarContainer{
+      position:relative;
+      width:fit-content;
+      margin:0 auto;
+      background:var(--surface-dark);
+      border-radius:12px;
+      border:var(--simple-border);
+      box-shadow:var(--simple-shadow);
+      padding:15px;
+    }
+    #weekTable{
+      border-collapse:separate;
+      border-spacing:6px;
+      width:864px;
+      table-layout:fixed;
+      background:transparent;
+    }
+    #weekTable thead tr th,
+    #weekTable tbody th,
+    #weekTable tbody td{
+      padding:10px;
+      text-align:center;
+      vertical-align:middle;
+      border-radius:6px;
+      font-weight:600;
+      border:1px solid rgba(255, 255, 255, 0.1);
+    }
+    #weekTable thead tr th{
+      background:var(--surface-hover);
+      color:var(--primary-neon);
+    }
+    #weekTable tbody th{
+      background:var(--surface-hover);
+      color:var(--primary-purple);
+    }
+    #weekTable tbody td{
+      background:var(--surface-dark);
+      color:var(--primary-neon);
+      cursor:pointer;
+      transition:background-color 0.2s ease;
+    }
+    #weekTable tbody td:hover{
+      background:var(--surface-hover);
+    }
+    #weekTable th{cursor:pointer;}
+
+    .frei{
+      background:rgba(0, 255, 136, 0.3)!important;
+      color:var(--primary-neon)!important;
+      border-color:var(--primary-neon)!important;
+    }
+    .gebucht{
+      background:rgba(236, 72, 153, 0.3)!important;
+      color:var(--primary-pink)!important;
+      border-color:var(--primary-pink)!important;
+    }
+
+    /* ---------- Simple Modals ---------- */
+    .modal{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0, 0, 0, 0.8);
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+    }
+    .modal-content{
+      background:var(--surface-dark);
+      padding:25px;
+      border-radius:12px;
+      text-align:center;
+      min-width:350px;
+      box-shadow:var(--simple-shadow);
+      border:var(--simple-border);
+    }
+    .modal-content p{
+      color:var(--primary-neon);
+      font-weight:600;
+      margin-bottom:20px;
+      font-size:16px;
+    }
+    .modal-content label{
+      display:inline-block;
+      margin-top:10px;
+      text-align:left;
+      width:80px;
+      color:var(--primary-purple);
+      font-weight:600;
+    }
+    .modal-content input[type="date"],.modal-content input[type="text"]{
+      width:180px;
+      padding:8px;
+      border:1px solid rgba(255, 255, 255, 0.2);
+      border-radius:6px;
+      margin:5px 0;
+      background:var(--bg-dark);
+      color:var(--primary-neon);
+    }
+    .modal-content button{
+      margin:10px 5px;
+      padding:10px 20px;
+      font-size:14px;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      transition:background-color 0.2s ease;
+      font-weight:600;
+    }
+    .modal-content button:hover{
+      opacity:0.9;
+    }
+    #submitBooking{
+      background:var(--primary-neon);
+      color:var(--bg-dark);
+    }
+    #cancelBooking{
+      background:var(--primary-pink);
+      color:white;
+    }
+
+    #errorModal,#deleteModal,#partialDeleteModal{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0, 0, 0, 0.8);
+      align-items:center;
+      justify-content:center;
+      z-index:10000;
+    }
+    #errorModal .modal-content,#deleteModal .modal-content,#partialDeleteModal .modal-content{
+      background:var(--surface-dark);
+      padding:25px;
+      border-radius:12px;
+      text-align:center;
+      min-width:350px;
+      box-shadow:var(--simple-shadow);
+      border:var(--simple-border);
+    }
+    #errorModal button,#deleteModal button,#partialDeleteModal button{
+      margin:8px;
+      padding:10px 20px;
+      border:none;
+      border-radius:8px;
+      background:var(--primary-neon);
+      color:var(--bg-dark);
+      cursor:pointer;
+      font-weight:600;
+    }
+    #deleteWhole{
+      background:var(--primary-pink)!important;
+      color:white!important;
+    }
+    #deletePartial{
+      background:var(--accent-gold)!important;
+    }
+    #errorText,#deleteText{
+      margin-bottom:20px;
+      color:var(--primary-neon);
+      font-weight:600;
+      font-size:16px;
+    }
+    #partialDeleteModal .dayList{
+      text-align:left;
+      margin:10px 0;
+      max-height:200px;
+      overflow-y:auto;
+      background:var(--bg-dark);
+      border-radius:8px;
+      padding:10px;
+      border:1px solid rgba(255, 255, 255, 0.1);
+    }
+    #partialDeleteModal .dayList label{
+      display:block;
+      margin:5px 0;
+      color:var(--primary-purple);
+      font-weight:500;
+      cursor:pointer;
+    }
+    #partialDeleteModal .dayList input[type="checkbox"]{
+      margin-right:10px;
+      accent-color:var(--primary-neon);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header‑Bild -->
+  <img src="assets/heuteam.png" alt="Heute am Institut" class="headerImage">
+
+  <!-- Vierecke -->
+  <div class="container">
+    <svg viewBox="0 0 720 200">
+      <!-- Simple solid colors, no gradients or filters -->
+      <g class="roomGroup" data-roomid="1.30"><rect x="37"  y="50" width="100" height="100" fill="#00ff88" rx="8" ry="8"></rect><text x="87"  y="100" font-size="16" text-anchor="middle">1.30</text></g>
+      <g class="roomGroup" data-roomid="1.40-1"><rect x="174" y="50" width="100" height="100" fill="#00ff88" rx="8" ry="8"></rect><text x="224" y="100" font-size="16" text-anchor="middle">1.40-1</text></g>
+      <g class="roomGroup" data-roomid="1.40-2"><rect x="311" y="50" width="100" height="100" fill="#00ff88" rx="8" ry="8"></rect><text x="361" y="100" font-size="16" text-anchor="middle">1.40-2</text></g>
+      <g class="roomGroup" data-roomid="1.47-1"><rect x="448" y="50" width="100" height="100" fill="#00ff88" rx="8" ry="8"></rect><text x="498" y="100" font-size="16" text-anchor="middle">1.47-1</text></g>
+      <g class="roomGroup" data-roomid="1.47-2"><rect x="585" y="50" width="100" height="100" fill="#00ff88" rx="8" ry="8"></rect><text x="635" y="100" font-size="16" text-anchor="middle">1.47-2</text></g>
+    </svg>
+    <div id="preview"></div>
+  </div>
+
+  <!-- Pfeil‑/Text‑Bild -->
+  <img src="assets/platz.png" alt="Buche dir deinen Platz" class="midImage">
+
+  <!-- The rest is exactly the same HTML as the original -->
+  <!-- Kalender -->
+  <div class="calendarWrapper">
+    <div class="weekNav">
+      <button id="prevWeek">Zurück</button>
+      <span id="weekLabel"></span>
+      <button id="nextWeek">Weiter</button>
+    </div>
+
+    <div class="calendarContainer">
+      <table id="weekTable">
+        <thead id="tableHeader"></thead>
+        <tbody>
+          <tr id="row-1.30"><th>1.30</th></tr>
+          <tr id="row-1.40-1"><th>1.40-1</th></tr>
+          <tr id="row-1.40-2"><th>1.40-2</th></tr>
+          <tr id="row-1.47-1"><th>1.47-1</th></tr>
+          <tr id="row-1.47-2"><th>1.47-2</th></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal: Buchung anlegen -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <p id="modalText"></p>
+      <div><label for="userName">Name:</label><input type="text" id="userName" placeholder="Dein Name"></div>
+      <div><label for="startDate">Von:</label><input type="date" id="startDate"></div>
+      <div><label for="endDate">Bis:</label><input type="date" id="endDate"></div>
+      <br>
+      <button id="submitBooking">Buchung absenden</button>
+      <button id="cancelBooking">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- Fehler‑Modal -->
+  <div id="errorModal" class="modal">
+    <div class="modal-content">
+      <p id="errorText"></p>
+      <button id="errorClose">OK</button>
+    </div>
+  </div>
+
+  <!-- Löschen‑Modal -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content">
+      <p id="deleteText"></p>
+      <button id="deleteWhole">gesamte buchung löschen</button>
+      <button id="deletePartial">einzelne tage löschen</button>
+      <button id="deleteCancel">abbrechen</button>
+    </div>
+  </div>
+
+  <!-- Partial‑Delete‑Modal -->
+  <div id="partialDeleteModal" class="modal">
+    <div class="modal-content">
+      <p id="partialDeleteText">Wählen Sie die Tage aus, die gelöscht werden sollen:</p>
+      <div id="partialDeleteList" class="dayList"></div>
+      <button id="partialDeleteConfirm">löschen</button>
+      <button id="partialDeleteCancel">abbrechen</button>
+    </div>
+  </div>
+
+  <script>
+    /* Same JavaScript as original, just copy the entire script section */
+    const baseUrl = "assets/";
+    const norm = s => (typeof s === "string" ? s.slice(0,10) : s);
+    const weekdaysShort = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+    const getWeekdayShort = d => weekdaysShort[d.getDay()];
+    const toISODate = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    const formatDateShort = iso => iso.split("-").reverse().join(".").slice(0,6);
+    const getLocalToday = () => toISODate(new Date());
+
+    let bookings = [];
+    let weekStart = null;
+    let selectedRoomId = "";
+    let currentBookingToDelete = null;
+    let previewHideTimeout = null;
+
+    function updatePlatzColorsSVG(){
+      const today = getLocalToday();
+      document.querySelectorAll(".roomGroup").forEach(group=>{
+        const rect   = group.querySelector("rect");
+        const roomId = group.dataset.roomid;
+        const booked = bookings.some(b =>
+          b.roomId === roomId &&
+          norm(b.startDate) <= today &&
+          norm(b.endDate)   >= today
+        );
+        rect.style.fill = booked ? "#ec4899" : "#00ff88";
+      });
+    }
+
+    const computeMonday = d => {const w = new Date(d);w.setDate(w.getDate() - ((d.getDay()+6)%7));return w;};
+    function initWeek(){weekStart = computeMonday(new Date());}
+
+    function changeWeek(n){
+      weekStart.setDate(weekStart.getDate() + n * 7);
+      buildWeekHeader();
+      buildWeekTable();
+    }
+
+    function buildWeekHeader(){
+      const header = document.getElementById("tableHeader");
+      header.innerHTML = "";
+      const tr1 = document.createElement("tr");
+      const tr2 = document.createElement("tr");
+      tr1.innerHTML = `<th rowspan="2">Raum</th>`;
+      
+      const current = new Date(weekStart);
+      for(let i = 0; i < 5; i++){
+        const day = current.getDate();
+        const month = current.getMonth() + 1;
+        const weekday = getWeekdayShort(current);
+        const th1 = document.createElement("th");
+        const th2 = document.createElement("th");
+        th1.textContent = weekday;
+        th2.textContent = `${day}.${month}.`;
+        tr1.appendChild(th1);
+        tr2.appendChild(th2);
+        current.setDate(current.getDate() + 1);
+      }
+      
+      header.appendChild(tr1);
+      header.appendChild(tr2);
+      
+      const monday = new Date(weekStart);
+      const sunday = new Date(weekStart);
+      sunday.setDate(sunday.getDate() + 6);
+      
+      const formatWeek = d => {
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}.${month}.${year}`;
+      };
+      
+      document.getElementById("weekLabel").textContent = 
+        `KW ${getWeekNumber(monday)} (${formatWeek(monday)} - ${formatWeek(sunday)})`;
+    }
+
+    function getWeekNumber(d){
+      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const dayNum = date.getUTCDay() || 7;
+      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+      return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function fillRow(roomId){
+      const row = document.getElementById(`row-${roomId}`);
+      if(!row) return;
+      
+      const existingCells = row.querySelectorAll("td");
+      existingCells.forEach(cell => cell.remove());
+      
+      const current = new Date(weekStart);
+      for(let i = 0; i < 5; i++){
+        const td = document.createElement("td");
+        const cellDate = toISODate(current);
+        
+        const dayBookings = bookings.filter(b =>
+          b.roomId === roomId &&
+          norm(b.startDate) <= cellDate &&
+          norm(b.endDate) >= cellDate
+        );
+        
+        if(dayBookings.length > 0){
+          td.classList.add("gebucht");
+          td.innerHTML = dayBookings.map(b => `<div>${b.name}</div>`).join("");
+          
+          td.onclick = () => {
+            currentBookingToDelete = dayBookings[0];
+            document.getElementById("deleteText").textContent = 
+              `Möchten Sie die Buchung von ${currentBookingToDelete.name} 
+               (${formatDateShort(currentBookingToDelete.startDate)} - 
+                ${formatDateShort(currentBookingToDelete.endDate)}) löschen?`;
+            document.getElementById("deleteModal").style.display = "flex";
+          };
+        } else {
+          td.classList.add("frei");
+          td.textContent = "Frei";
+          
+          td.onclick = () => {
+            selectedRoomId = roomId;
+            document.getElementById("modalText").textContent = 
+              `Buchung für ${roomId} am ${formatDateShort(cellDate)}`;
+            document.getElementById("startDate").value = cellDate;
+            document.getElementById("endDate").value = cellDate;
+            document.getElementById("userName").value = "";
+            document.getElementById("modal").style.display = "flex";
+          };
+        }
+        
+        row.appendChild(td);
+        current.setDate(current.getDate() + 1);
+      }
+    }
+
+    function autoScaleCellText(){
+      document.querySelectorAll("#weekTable tbody td div").forEach(div => {
+        if(div.scrollWidth > div.clientWidth){
+          let fontSize = 12;
+          div.style.fontSize = fontSize + "px";
+          while(div.scrollWidth > div.clientWidth && fontSize > 8){
+            fontSize -= 0.5;
+            div.style.fontSize = fontSize + "px";
+          }
+        }
+      });
+    }
+
+    function buildWeekTable(){
+      ["1.30","1.40-1","1.40-2","1.47-1","1.47-2"].forEach(fillRow);
+      autoScaleCellText();
+    }
+
+    function loadBookings(){
+      fetch("/bookings")
+        .then(r => r.json())
+        .then(data => {
+          bookings = data;
+          buildWeekHeader();
+          buildWeekTable();
+          updatePlatzColorsSVG();
+        })
+        .catch(err => console.error("Fehler beim Laden:",err));
+    }
+
+    const previewDiv = document.getElementById("preview");
+
+    document.querySelectorAll(".roomGroup").forEach(group=>{
+      const rect = group.querySelector("rect");
+      const text = group.querySelector("text");
+      const id   = group.dataset.roomid;
+
+      group.onmouseenter = ()=>{
+        clearTimeout(previewHideTimeout);
+        const img = `${baseUrl}${id}.jpg`;
+        previewDiv.innerHTML = `<img src="${img}" style="width:300px;height:300px" alt="Vorschau">`;
+        previewDiv.style.display="block";previewDiv.style.opacity="1";
+
+        const contB = document.querySelector(".container").getBoundingClientRect();
+        const rectB = rect.getBoundingClientRect();
+        previewDiv.style.left = ((rectB.left+rectB.right)/2 - contB.left -150)+"px";
+        previewDiv.style.top  = (rectB.bottom - contB.top +5)+"px";
+
+        const isRed = (rect.style.fill||rect.getAttribute("fill")||"").toLowerCase().includes("ec4899");
+        const x     = text.getAttribute("x")||0;
+        text.innerHTML = isRed
+          ? `<tspan x="${x}" dy="0">Leider</tspan><tspan x="${x}" dy="1.2em">heute schon</tspan><tspan x="${x}" dy="1.2em">belegt</tspan>`
+          : `<tspan x="${x}" dy="0">Willst du</tspan><tspan x="${x}" dy="1.2em">buchen?</tspan>`;
+        group.style.transform="scale(1.1)";
+      };
+
+      group.onmouseleave = ()=>{
+        previewHideTimeout = setTimeout(()=>{previewDiv.style.opacity="0";setTimeout(()=>previewDiv.style.display="none",300);},300);
+        group.style.transform="scale(1)";setTimeout(()=>text.textContent=id,300);
+      };
+
+      group.onclick = ()=>{
+        if((rect.style.fill||"").toLowerCase().includes("ec4899")) return;
+        selectedRoomId = id;
+        const today = getLocalToday();
+        document.getElementById("modalText").textContent = `Buchung für ${id} am ${formatDateShort(today)}`;
+        document.getElementById("startDate").value = today;
+        document.getElementById("endDate").value   = today;
+        document.getElementById("userName").value  = "";
+        document.getElementById("modal").style.display="flex";
+      };
+    });
+
+    document.getElementById("prevWeek").onclick      = () => changeWeek(-1);
+    document.getElementById("nextWeek").onclick      = () => changeWeek(1);
+    document.getElementById("cancelBooking").onclick = () => document.getElementById("modal").style.display="none";
+    document.getElementById("errorClose").onclick    = () => document.getElementById("errorModal").style.display="none";
+    document.getElementById("deleteCancel").onclick  = () => {currentBookingToDelete=null;document.getElementById("deleteModal").style.display="none";};
+    document.getElementById("partialDeleteCancel").onclick = () => document.getElementById("partialDeleteModal").style.display="none";
+
+    document.getElementById("submitBooking").onclick = ()=>{
+      const name = document.getElementById("userName").value.trim();
+      const s    = document.getElementById("startDate").value;
+      const e    = document.getElementById("endDate").value;
+      if(!name) {showError("Bitte einen Namen eingeben!");return;}
+      if(!s||!e){showError("Bitte Start- und Enddatum wählen!");return;}
+      if(e<s)   {showError("Enddatum darf nicht vor dem Startdatum liegen!");return;}
+
+      let conflict=false;
+      let cur=new Date(s), end=new Date(e);
+      while(cur<=end){
+        const iso = toISODate(cur);
+        if(bookings.some(b=>b.roomId===selectedRoomId && norm(b.startDate)<=iso && norm(b.endDate)>=iso)){conflict=true;break;}
+        cur.setDate(cur.getDate()+1);
+      }
+      if(conflict){showError("Buchung nicht möglich. Der Platz ist an ausgewählten Tagen bereits belegt!");return;}
+
+      fetch("/bookings",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({roomId:selectedRoomId,name,startDate:s,endDate:e})
+      })
+        .then(r=>r.json())
+        .then(()=>{document.getElementById("modal").style.display="none";loadBookings();})
+        .catch(err=>console.error("Fehler beim Buchen:",err));
+    };
+
+    document.getElementById("deleteWhole").onclick = ()=>{
+      if(!currentBookingToDelete){document.getElementById("deleteModal").style.display="none";return;}
+      fetch(`/bookings/${currentBookingToDelete.id}`,{method:"DELETE"})
+        .then(r=>r.json())
+        .then(()=>{currentBookingToDelete=null;document.getElementById("deleteModal").style.display="none";loadBookings();})
+        .catch(err=>console.error("Fehler beim Löschen:",err));
+    };
+
+    document.getElementById("deletePartial").onclick = ()=>{
+      if(!currentBookingToDelete){document.getElementById("deleteModal").style.display="none";return;}
+      const list = document.getElementById("partialDeleteList"); list.innerHTML="";
+      const start=new Date(currentBookingToDelete.startDate), end=new Date(currentBookingToDelete.endDate);
+      for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+        const iso = toISODate(d);
+        const label=document.createElement("label");
+        const cb=document.createElement("input"); cb.type="checkbox";cb.value=iso;
+        label.append(cb,` ${formatDateShort(iso)}`); list.appendChild(label);
+      }
+      document.getElementById("deleteModal").style.display="none";
+      document.getElementById("partialDeleteModal").style.display="flex";
+    };
+
+    document.getElementById("partialDeleteConfirm").onclick = ()=>{
+      const dates=[...document.querySelectorAll('#partialDeleteList input:checked')].map(cb=>cb.value);
+      if(!dates.length){showError("Bitte wählen Sie mindestens einen Tag aus!");return;}
+      fetch(`/bookings/${currentBookingToDelete.id}/split`,{
+        method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({deleteDates:dates})
+      })
+        .then(r=>r.json())
+        .then(()=>{document.getElementById("partialDeleteModal").style.display="none";loadBookings();})
+        .catch(err=>console.error("Fehler beim Splitten:",err));
+    };
+
+    const showError = msg => {document.getElementById("errorText").textContent=msg;document.getElementById("errorModal").style.display="flex";};
+
+    initWeek();
+    loadBookings();
+  </script>
+</body>
+</html>

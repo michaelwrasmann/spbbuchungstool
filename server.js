@@ -280,9 +280,15 @@ app.post('/bookings/:id/split', (req, res) => {
   });
 });
 
-// Root-URL liefert index.html
+// Root-URL liefert index.html oder light version
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  // Check for light version query parameter or user agent
+  const isLightMode = req.query.light === 'true' || 
+                      req.get('user-agent').includes('Raspbian') ||
+                      req.get('user-agent').includes('armv7l');
+  
+  const file = isLightMode ? 'index-light.html' : 'index.html';
+  res.sendFile(path.join(__dirname, file));
 });
 
 // Server starten
