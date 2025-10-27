@@ -1,0 +1,20 @@
+# Node modules
+node_modules/
+
+# Environment variables (system-specific)
+.env
+
+# SQLite databases (local development)
+*.db
+*.db-journal
+
+# SSL certificates (generated locally)
+ssl/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
